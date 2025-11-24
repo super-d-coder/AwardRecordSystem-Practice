@@ -173,16 +173,52 @@ void AwardSystem::insertAward()
 	awards.emplace_back(name, time, type);
 }
 
+
 /**
- * @brief 删除现有奖项（待实现）
- * @todo 1. 支持按奖项名称/索引删除；
- *       2. 校验删除的奖项是否存在；
- *       3. 删除后同步更新文件数据
+ * @brief 删除现有奖项（已实现按索引删除）
+ * @details 1. 支持按奖项编号（索引）删除；
+ *          2. 校验输入合法性（非数字/越界/空容器）；
+ *          3. 删除后自动同步文件数据（mainMenu中调用saveAwards）
+ * @todo 1. 扩展支持按奖项名称模糊删除（可选）；
  */
 void AwardSystem::delAward()
 {
+	// 空容器判断
+	if (awards.empty()) {
+		cerr << "错误：当前奖项库为空，无奖项可删除" << endl;
+		return;
+	}
 
+	cout << "请输入要删除奖项的编号:";
+	int index = 0;//读取用户要删除的编号
+
+	// 非数字输入验证（和mainMenu保持一致）
+	while (!(cin >> index)) {
+		cin.clear(); // 重置错误状态
+		cin.ignore(numeric_limits<streamsize>::max(), '\n'); // 清空错误输入
+		cerr << "❌ 输入错误！只能输入数字，请重新输入：";
+	}
+
+	//检测删除的奖项是否存在,若不存在重新读取
+	if (index <= 0 || index > awards.size()) {
+		cerr << "错误：要删除的奖项不存在" << endl;
+		return;
+	}
+
+	auto it = awards.begin();//创建迭代器寻找要删除的元素
+	it = it + index - 1;//指向要删除的目标
+
+	if (it >= awards.end()) { // 双重校验，避免极端情况越界
+		cerr << "错误：要删除的奖项不存在" << endl;
+		return;
+	}
+
+	it = awards.erase(it);//删除指定目标
+	cout << "成功删除编号为" << index << "的奖项，删除该奖项后表变为：" << endl;
+	showAwards();
 }
+
+
 
 /**
  * @brief 展示内存中所有奖项
@@ -193,8 +229,11 @@ void AwardSystem::showAwards()
 	cout << "-----------奖项清单------------" << endl;
 
 	// 遍历容器：const&避免拷贝，保证只读
+	int num = 1;//定义奖项编号，方便计数
 	for (const Award& a : awards) {
-		cout << a.getName() << "," << a.getTime() << "," << a.getType() << endl;
+		cout << num << ' ';
+		cout << a.getName() << "\t" << a.getTime() << "\t" << a.getType() << endl;
+		num++;
 	}
 }
 

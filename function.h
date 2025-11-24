@@ -34,7 +34,7 @@ public:
 	const string getFile() { return data_file; }
 	void mainMenu();//展示菜单，进入主循环
 	void insertAward();//插入新的奖项
-	void delAward();//删除奖项
+	void delAward();//根据编号删除奖项
 	void showAwards();//展示现有的奖项
 	void saveAwards() const;//保存结果到文件
 };
